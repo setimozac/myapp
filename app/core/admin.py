@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import MyUser
+from django.utils.translation import gettext as _
 
 
 class UserAdmin(BaseUserAdmin):
@@ -9,17 +10,18 @@ class UserAdmin(BaseUserAdmin):
     list_filter = ('is_superuser',)
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
-        ('personal info', {'fields': ('name',)}),
-        ("permissions", {'fields': ("is_staff", "is_superuser")}),
+        (_('Personal info'), {'fields': ('name',)}),
+        (_("Permissions"), {'fields': ("is_staff", "is_superuser")}),
+        (_('Dates'), {'fields': ('last_login', )})
     )
-    add_fields = (
+    add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('email', 'name', 'password1', 'password2')
-        })
+            'fields': ('email', 'password1', 'password2')
+        }),
     )
     search_fields = ('email', )
-    ordering = ('email', "name")
+    ordering = ('id', )
     filter_horizontal = ()
 
 
