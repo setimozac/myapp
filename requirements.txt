@@ -1,0 +1,4 @@
+django>=2.2.0,<2.3.0
+djangorestframework>=3.10.0,<3.11.0
+pillow>=7.1.1,<7.2.0
+flake8>=3.7.9,<3.8.0
