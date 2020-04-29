@@ -53,3 +53,41 @@ class PublicUserApiTests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertFalse(user_exists)
+
+    def test_public_authentication_endpoint(self):
+        url = reverse("users:token")
+
+        res = self.client.get(url)
+
+        self.assertEqual(res.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_user_authenticate_successfull(self):
+        url = reverse("users:token")
+        get_user_model().objects.create_user(**self.payload)
+
+        res = self.client.post(url, self.payload)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn('token', res.data)
+        self.assertNotIn('password', res.data)
+
+    def test_token_invalid_payload(self):
+        url = reverse("users:token")
+
+        res = self.client.post(url, {})
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertNotIn('token', res.data)
+
+
+class PrivateUserTest(TestCase):
+
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(
+            email='testuser@test.com',
+            password='testingpass123',
+            name='test user'
+        )
+
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
