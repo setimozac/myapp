@@ -79,6 +79,13 @@ class PublicUserApiTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertNotIn('token', res.data)
 
+    def test_user_management_is_private(self):
+        url = reverse("users:me")
+
+        res = self.client.get(url)
+
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
 
 class PrivateUserTest(TestCase):
 
@@ -91,3 +98,36 @@ class PrivateUserTest(TestCase):
 
         self.client = APIClient()
         self.client.force_authenticate(user=self.user)
+
+    def test_user_update_successfull(self):
+        url = reverse("users:me")
+        res = self.client.patch(url, {
+            "password": "newpass123",
+            "name": "new name"
+        })
+
+        self.user.refresh_from_db()
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertTrue(self.user.check_password("newpass123"))
+        self.assertEqual(self.user.name, "new name")
+
+    def test_user_update_invalid_data(self):
+        url = reverse("users:me")
+        res = self.client.patch(url, {"password": "123"})
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_post_method_not_allowed(self):
+        url = reverse("users:me")
+        res = self.client.post(url, {})
+
+        self.assertEqual(res.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_retrieve_user_successfull(self):
+        url = reverse("users:me")
+
+        res = self.client.get(url)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data['email'], self.user.email)
